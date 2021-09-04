@@ -20,11 +20,13 @@ controller.anyButton.onEvent(ControllerButtonEvent.Pressed, function () {
         }
     }
 })
+sprites.onOverlap(SpriteKind.Player, SpriteKind.Gap, function (sprite, otherSprite) {
+    if (otherSprite.right - sprite.left < 1) {
+        info.changeScoreBy(1)
+    }
+})
 sprites.onOverlap(SpriteKind.Player, SpriteKind.Projectile, function (sprite, otherSprite) {
     game.over(false)
-})
-sprites.onOverlap(SpriteKind.Player, SpriteKind.Gap, function (sierra, gap) {
-    info.changeScoreBy(1)
 })
 let bottomProjectile: Sprite = null
 let topProjectile: Sprite = null
@@ -34,11 +36,32 @@ let bottomImage: Image = null
 let topImage: Image = null
 let gapNumber = 0
 let effect = ""
-let sierra: Sprite = null
 let effects2: string[] = []
-// All the images for animating our duck.
-let sierraAnimationFrames = [
-img`
+let sierra: Sprite = null
+scene.setBackgroundColor(9)
+info.setScore(0)
+effects.blizzard.startScreenEffect()
+sierra = sprites.create(img`
+    . . . . . . . . . . . . . . . . 
+    . . . . . . f f f f f f . . . . 
+    . . . . f f e e e e f 2 f . . . 
+    . . . f f e e e e f 2 2 2 f . . 
+    . . . f e e e f f e e e e f . . 
+    . . . f f f f e e 2 2 2 2 e f . 
+    . . . f e 2 2 2 f f f f e 2 f . 
+    . . f f f f f f f e e e f f f . 
+    . . f f e 4 4 e b f 4 4 e e f . 
+    . . f e e 4 d 4 1 f d d e f . . 
+    . . . f e e e e e d d d f . . . 
+    . . . . . f 4 d d e 4 e f . . . 
+    . . . . . f e d d e 2 2 f . . . 
+    . . . . f f f e e f 5 5 f f . . 
+    . . . . f f f f f f f f f f . . 
+    . . . . . f f . . . f f f . . . 
+    `, SpriteKind.Player)
+sierra.ay = 300
+let flapAnim = animation.createAnimation(ActionKind.Jumping, 25)
+flapAnim.addAnimationFrame(img`
     . . . . . . . . . . . . . . . . 
     . . . . . f f f f f f . . . . . 
     . . . f f e e e e f 2 f . . . . 
@@ -55,8 +78,8 @@ img`
     . . . f f f e e f 5 5 f f . . . 
     . . . f f f f f f f f f f . . . 
     . . . . f f . . . f f f . . . . 
-    `,
-img`
+    `)
+flapAnim.addAnimationFrame(img`
     . . . . . . f f f f 4 4 f . . . 
     . . . . f f b f 5 4 5 5 4 f . . 
     . . . f b 3 3 e 4 5 5 5 5 f . . 
@@ -73,8 +96,8 @@ img`
     . . . . f b e e b d b d b f . . 
     . . . . f f d 1 d 1 d 1 f f . . 
     . . . . . . f f b b f f . . . . 
-    `,
-img`
+    `)
+flapAnim.addAnimationFrame(img`
     ........................
     ........................
     ........................
@@ -99,8 +122,8 @@ img`
     ........................
     ........................
     ........................
-    `,
-img`
+    `)
+flapAnim.addAnimationFrame(img`
     . f f f . f f f f f . . . . 
     f f f f f c c c c f f . . . 
     f f f f b c c c c c c f . . 
@@ -117,8 +140,8 @@ img`
     . . . f e e f 6 6 6 f . . . 
     . . . . f f f f f f . . . . 
     . . . . . f f f . . . . . . 
-    `,
-img`
+    `)
+flapAnim.addAnimationFrame(img`
     . . . . . . . . . . b 5 b . . . 
     . . . . . . . . . b 5 b . . . . 
     . . . . . . b b b b b b . . . . 
@@ -135,8 +158,8 @@ img`
     b b c c c d d d 5 5 5 5 5 d b . 
     . . . . c c d d d 5 5 5 b b . . 
     . . . . . . c c c c c b b . . . 
-    `,
-img`
+    `)
+flapAnim.addAnimationFrame(img`
     . . . . . . . . . . . . . . . . 
     . . . . . . . . c c c c . . . . 
     . . . . . . c c 5 5 5 5 c c . . 
@@ -153,8 +176,9 @@ img`
     . c d d d b 5 5 d c c c c . . . 
     . . c c c b 5 5 b c c c c c . . 
     . . . . c b 5 5 d c b b b c . . 
-    `
-]
+    `)
+animation.attachAnimation(sierra, flapAnim)
+effects2 = ["rings", "disintegrate", "spray"]
 // All the images for our top obstacles.
 let obstacleTopImgs = [img`
     .....ffffffffffffff.....
@@ -397,21 +421,10 @@ let obstacleBottomImgs = [img`
     ......ff88ffff88f888....
     ......ff8ffffff8fff.....
     `]
-effects2 = ["rings", "disintegrate", "spray"]
-scene.setBackgroundColor(9)
-info.setScore(0)
-sierra = sprites.create(sierraAnimationFrames[0], SpriteKind.Player)
-effects.blizzard.startScreenEffect()
 game.showLongText("Hello! I'm Sierra!", DialogLayout.Bottom)
 game.showLongText("I need to get past the obstacles.", DialogLayout.Bottom)
 game.showLongText("Even though I'll morph into different things,", DialogLayout.Bottom)
 game.showLongText("please help me do it.", DialogLayout.Bottom)
-sierra.ay = 300
-let flapAnim = animation.createAnimation(ActionKind.Jumping, 25)
-for (let index = 0; index <= sierraAnimationFrames.length; index++) {
-    flapAnim.addAnimationFrame(sierraAnimationFrames[index])
-}
-animation.attachAnimation(sierra, flapAnim)
 game.onUpdate(function () {
     if (sierra.bottom > 123 || sierra.top < 0) {
         game.over(false)
@@ -425,7 +438,7 @@ game.onUpdateInterval(1500, function () {
     gapImage.fill(1)
     gapSprite = sprites.create(gapImage, SpriteKind.Gap)
     gapSprite.setFlag(SpriteFlag.Invisible, true)
-    gapSprite.setFlag(SpriteFlag.Ghost, true)
+    gapSprite.setFlag(SpriteFlag.Ghost, false)
     gapSprite.vx = -45
     gapSprite.left = scene.screenWidth()
     topProjectile = sprites.createProjectileFromSide(topImage, -45, 0)
@@ -433,4 +446,9 @@ game.onUpdateInterval(1500, function () {
     topProjectile.top = 0
     bottomProjectile.bottom = scene.screenHeight()
     gapSprite.setFlag(SpriteFlag.Invisible, false)
+})
+forever(function () {
+    if (info.score() >= 25) {
+        game.over(true)
+    }
 })
